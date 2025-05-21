@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hello App Engine">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <title>Cloud Computing Lab | Matrix Calculator.</title>
+  <style>
+    input{
+        width: 30px;
+    }
+  </style>
+</head>
+
+<body>
+    <header>
+         <h2 style="display: flex;margin: 30px 20px 50px 100px; background-color: beige;">Matrix Calculator</h2><hr>
+ 
+    </header>
+      <div class="row">
+        <div class="col-4 my-2 " >
+            <h3>Matrix Operation</h3>
+            <ul>
+                <li>Matrix Multiplication</li>
+                <li>Matrix Addition</li>
+                <li>Matrix Inverse</li>
+            </ul>
+        </div>
+<div class="matrix-container col-4" style="margin-top: 20px;">
+    <h3>Matrix A:</h3>
+    <table id="matrixTableA"></table>
+    <div class="my-2">
+    <button class="btn x-2 y-2 btn-primary" onclick="addRow('A')">Add Row</button>
+    <button class="btn x-2 y-2 btn-danger" onclick="removeRow('A')">Remove Row</button>
+    <button class="btn x-2 y-2 btn-primary" onclick="addColumn('A')">Add Column</button>
+    <button class="btn x-2 y-2 btn-danger" onclick="removeColumn('A')">Remove Column</button>
+    <button class="btn x-2 y-2 btn-success" onclick="readMatrix('A')">Show Matrix A</button>
+    <p id="matrixA"></p>
+    </div>
+</div>
+
+<div class="matrix-container col-4">
+    <h3>Matrix B:</h3>
+    <table id="matrixTableB"></table>
+    <div class="my-2">
+    <button class="btn x-2 y-2 btn-primary" onclick="addRow('B')">Add Row</button>
+    <button  class="btn x-2 y-2 btn-danger" onclick="removeRow('B')">Remove Row</button>
+    <button  class="btn x-2 y-2 btn-primary " onclick="addColumn('B')">Add Column</button>
+    <button  class="btn x-2 y-2 btn-danger " onclick="removeColumn('B')">Remove Column</button>
+    <button  class="btn x-2 y-2 btn-success" onclick="readMatrix('B')">Show Matrix B</button>
+    <p id="matrixB"></p>
+    </div>
+</div>
+
+    </div>
+<div class="row result-matrix" style="clear: both; margin-top: 30px;">
+    <div class="col-4"></div>
+    <div class="col-4">
+            <button onclick="multiplyMatrices()">Multiply A × B</button>
+    <h3>Result (Matrix C = A × B):</h3>
+    <table id="resultMatrixC"></table>
+    </div>
+
+</div>
+
+<script>
+    // Default dimensions for each matrix
+    const matrixDims = {
+        A: { rows: 3, cols: 4 },
+        B: { rows: 3, cols: 4 }
+    };
+
+    function createMatrix(matrixId) {
+        const table = document.getElementById(`matrixTable${matrixId}`);
+        const { rows, cols } = matrixDims[matrixId];
+        table.innerHTML = "";
+
+        for (let i = 0; i < rows; i++) {
+            const tr = document.createElement("tr");
+            for (let j = 0; j < cols; j++) {
+                const td = document.createElement("td");
+                const input = document.createElement("input");
+                input.type = "integer";
+                td.appendChild(input);
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+    }
+
+    function addRow(matrixId) {
+        matrixDims[matrixId].rows++;
+        createMatrix(matrixId);
+    }
+
+    function removeRow(matrixId) {
+        if (matrixDims[matrixId].rows > 1) {
+            matrixDims[matrixId].rows--;
+            createMatrix(matrixId);
+        }
+    }
+
+    function addColumn(matrixId) {
+        matrixDims[matrixId].cols++;
+        createMatrix(matrixId);
+    }
+
+    function removeColumn(matrixId) {
+        if (matrixDims[matrixId].cols > 1) {
+            matrixDims[matrixId].cols--;
+            createMatrix(matrixId);
+        }
+    }
+
+    function readMatrix(matrixId) {
+        const table = document.getElementById(`matrixTable${matrixId}`);
+        const result = [];
+        const trs = table.getElementsByTagName("tr");
+
+        for (let i = 0; i < trs.length; i++) {
+            const row = [];
+            const tds = trs[i].getElementsByTagName("td");
+            if(!tds) continue;
+            for (let j = 0; j < tds.length; j++) {
+                const input = tds[j].querySelector("input");
+                row.push(Number(input.value) || 0);
+            }
+            if(row.length > 0){
+                 result.push(row);
+            }
+           
+        }
+
+        document.getElementById(`matrix${matrixId}`).innerText = JSON.stringify(result);
+        return result;
+    }
+
+     function multiplyMatrices() {
+        const A = readMatrix('A');
+        const B = readMatrix('B');
+
+        if(!A || !B) return;
+        console.log(A);
+        const rowsA = A.length;
+        const colsA = A[0].length;
+        const rowsB = B.length;
+        const colsB = B[0].length;
+
+        if (colsA !== rowsB) {
+            alert("Matrix multiplication is not possible: Columns of A must equal Rows of B.");
+            return;
+        }
+
+        const C = [];
+        for (let i = 0; i < rowsA; i++) {
+            C[i] = [];
+            for (let j = 0; j < colsB; j++) {
+                let sum = 0;
+                for (let k = 0; k < colsA; k++) {
+                    sum += A[i][k] * B[k][j];
+                }
+                C[i][j] = sum;
+            }
+        }
+
+        // Display result
+        const resultTable = document.getElementById("resultMatrixC");
+        resultTable.innerHTML = "";
+        for (let i = 0; i < C.length; i++) {
+            const tr = document.createElement("tr");
+            for (let j = 0; j < C[i].length; j++) {
+                const td = document.createElement("td");
+                td.textContent = C[i][j];
+                tr.appendChild(td);
+            }
+            resultTable.appendChild(tr);
+        }
+    }
+
+
+    // Initial setup for both matrices
+    createMatrix('A');
+    createMatrix('B');
+</script>
+</body>
+</html>
